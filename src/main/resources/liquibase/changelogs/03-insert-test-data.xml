@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+<changeSet id="03" author="docflow">
+    <sql>
+        <![CDATA[
+        INSERT INTO be.departments (department_code, department_name)
+        VALUES ('HR', 'Human Resources'),
+               ('IT', 'Information Technology'),
+               ('FIN', 'Finance');
+
+        INSERT INTO be.users (user_login, username, department_code)
+        VALUES ('johndoe', 'John Doe', 'IT'),
+               ('janedoe', 'Jane Doe', 'HR'),
+               ('alexsmith', 'Alex Smith', 'FIN');
+
+        INSERT INTO be.documents (user_login, type, name, body, creation_date, sign_date)
+        VALUES ('johndoe', 'OTHER', 'Document 1', 'This is the content of document 1', NOW(), NOW()),
+               ('alexsmith', 'OTHER', 'Document 2', 'This is the content of document 2', NOW(), NOW()),
+               ('alexsmith', 'OTHER', 'Document 3', 'This is the content of document 3', NOW(), NOW());
+        ]]>
+    </sql>
+</changeSet>
+</databaseChangeLog>

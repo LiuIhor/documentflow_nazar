@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="02" author="docflow">
+
+        <!-- Create departments table -->
+        <createTable tableName="departments" schemaName="be">
+            <column name="department_code" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="department_name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <!-- Create users table -->
+        <createTable tableName="users" schemaName="be">
+            <column name="user_login" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="department_code" type="varchar(255)">
+                <constraints nullable="false" foreignKeyName="fk_users_department"
+                             referencedTableName="departments"
+                             referencedColumnNames="department_code"/>
+            </column>
+        </createTable>
+
+        <!-- Alter documents to use user_login -->
+        <addColumn tableName="documents" schemaName="be">
+            <column name="user_login" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Add foreign key constraint from documents.user_login to users.user_login -->
+        <addForeignKeyConstraint
+                baseTableName="documents"
+                baseColumnNames="user_login"
+                constraintName="fk_documents_user_login"
+                referencedTableName="users"
+                referencedColumnNames="user_login"
+                baseTableSchemaName="be"
+                referencedTableSchemaName="be"
+                deferrable="false"
+                initiallyDeferred="false"
+                onDelete="SET NULL"/>
+
+    </changeSet>
+</databaseChangeLog>
