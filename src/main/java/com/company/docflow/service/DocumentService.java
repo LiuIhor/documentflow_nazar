@@ -1,6 +1,5 @@
 package com.company.docflow.service;
 
-import com.company.docflow.dto.DocumentCreateDto;
 import com.company.docflow.dto.DocumentDto;
 import com.company.docflow.dto.DocumentUpdateDto;
 import com.company.docflow.model.Document;
@@ -29,16 +28,14 @@ public class DocumentService {
     }
 
     @Transactional
-    public Document createDocument(Document document) {
+    public DocumentDto createDocument(DocumentDto document) {
 
-        if (document.getCreationDate() == null) {
-            document.setCreationDate(LocalDateTime.now());
-        }
-        return documentRepository.save(document);
+        Document savedDocument = documentRepository.save(convertToEntity(document));
+        return convertToDTO(savedDocument);
     }
 
     @Transactional
-    public Document updateDocument(Long id, DocumentUpdateDto updateDto) {
+    public DocumentDto updateDocument(Long id, DocumentUpdateDto updateDto) {
         Document document = documentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + id));
 
@@ -58,9 +55,8 @@ public class DocumentService {
             document.setSignDate(updateDto.getSignDate());
         }
 
-
-
-        return documentRepository.save(document);
+        Document savedDocument = documentRepository.save(document);
+        return convertToDTO(savedDocument);
     }
 
     @Transactional
@@ -71,21 +67,33 @@ public class DocumentService {
         documentRepository.deleteById(id);
     }
 
-//    public List<Document> getDocumentsByUsername(String username) {
-//        return documentRepository.findByUsername(username);
-//    }
+    public List<DocumentDto> getDocumentsByUsername(String username) {
+        List<Document> documents =  documentRepository.findByUserLogin_userLogin(username);
+        return documents.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-//    public List<Document> getDocumentsByUsernameAndSignStatus(String username, boolean isSigned) {
-//        if (isSigned) {
-//            return documentRepository.findByUsernameAndSignDateIsNotNull(username);
-//        } else {
-//            return documentRepository.findByUsernameAndSignDateIsNull(username);
-//        }
-//    }
+    public List<DocumentDto> getDocumentsByDateRange(LocalDateTime fromDate, LocalDateTime toDate) {
+        List<Document> documents = documentRepository.findByCreationDateBetween(fromDate, toDate);
+        return documents.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-//    public List<Document> getDocumentsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-//        return documentRepository.findByCreationDateBetween(startDate, endDate);
-//    }
+    public List<DocumentDto> getDocumentsByUsernameAndSignStatus(String username, boolean isSigned) {
+        if (isSigned) {
+            List<Document> foundDocuments = documentRepository.findByUserLogin_userLoginAndSignDateIsNotNull(username);
+            return foundDocuments.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } else {
+            List<Document> foundDocuments = documentRepository.findByUserLogin_userLoginAndSignDateIsNull(username);
+            return foundDocuments.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        }
+    }
 
     public List<DocumentDto> getAllDocuments() {
         List<Document>  documents = documentRepository.findAll();

@@ -10,6 +10,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,8 +27,8 @@ public class DocumentController {
     }
 
     @PostMapping
-    public ResponseEntity<Document> createDocument(@RequestBody Document document) {
-        Document createdDocument = documentService.createDocument(document);
+    public ResponseEntity<DocumentDto> createDocument(@RequestBody DocumentDto document) {
+        DocumentDto createdDocument = documentService.createDocument(document);
         return new ResponseEntity<>(createdDocument, HttpStatus.CREATED);
     }
 
@@ -37,37 +39,43 @@ public class DocumentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Document> updateDocument(@PathVariable Long id,
+    public ResponseEntity<DocumentDto> updateDocument(@PathVariable Long id,
                                                    @RequestBody DocumentUpdateDto updateDto) {
-        Document updatedDocument = documentService.updateDocument(id, updateDto);
+        DocumentDto updatedDocument = documentService.updateDocument(id, updateDto);
         return ResponseEntity.ok(updatedDocument);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/user/{username}")
-//    public ResponseEntity<List<Document>> getDocumentsByUser(@PathVariable String username) {
-//        List<Document> documents = documentService.getDocumentsByUsername(username);
-//        return ResponseEntity.ok(documents);
-//    }
+    @GetMapping("/byLogin")
+    public ResponseEntity<List<DocumentDto>> getDocumentsByUser(@RequestParam String username) {
+        List<DocumentDto> documents = documentService.getDocumentsByUsername(username);
+        return ResponseEntity.ok(documents);
+    }
 
-//    @GetMapping("/user/{username}/signed/{isSigned}")
-//    public ResponseEntity<List<Document>> getDocumentsByUserAndSignStatus(
-//            @PathVariable String username,
-//            @PathVariable boolean isSigned) {
-//        List<Document> documents = documentService.getDocumentsByUsernameAndSignStatus(username, isSigned);
-//        return ResponseEntity.ok(documents);
-//    }
+    @GetMapping("/user/{username}/signed/{isSigned}")
+    public ResponseEntity<List<DocumentDto>> getDocumentsByUserAndSignStatus(
+            @PathVariable String username,
+            @PathVariable boolean isSigned) {
+        List<DocumentDto> documents = documentService.getDocumentsByUsernameAndSignStatus(username, isSigned);
+        return ResponseEntity.ok(documents);
+    }
 
-//    @GetMapping("/date-range")
-//    public ResponseEntity<List<Document>> getDocumentsByDateRange(
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-//            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-//        List<Document> documents = documentService.getDocumentsByDateRange(startDate, endDate);
-//        return ResponseEntity.ok(documents);
-//    }
+    @GetMapping("/by-date-range")
+    public ResponseEntity<List<DocumentDto>> getDocumentsByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+
+        // Преобразуем LocalDate в начало и конец дня для точного диапазона
+        LocalDateTime fromDateTime = fromDate.atStartOfDay();
+        LocalDateTime toDateTime = toDate.atTime(23, 59, 59, 999999999);
+
+        List<DocumentDto> documents = documentService.getDocumentsByDateRange(fromDateTime, toDateTime);
+        return ResponseEntity.ok(documents);
+    }
+
 }
