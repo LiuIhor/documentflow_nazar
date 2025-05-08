@@ -105,7 +105,7 @@ public class DocumentService {
 
 
     private DocumentDto convertToDTO(Document document) {
-        return new DocumentDto(document.getName(), document.getType().name(), document.getBody(),
+        return new DocumentDto(document.getId(), document.getName(), document.getType().name(), document.getBody(),
                 document.getCreationDate(), document.getSignDate(), document.getUserLogin().getUserLogin());
     }
 

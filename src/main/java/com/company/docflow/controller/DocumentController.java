@@ -1,9 +1,8 @@
 package com.company.docflow.controller;
 
-import com.company.docflow.dto.DocumentCreateDto;
 import com.company.docflow.dto.DocumentDto;
 import com.company.docflow.dto.DocumentUpdateDto;
-import com.company.docflow.model.Document;
+import com.company.docflow.model.DocumentType;
 import com.company.docflow.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -51,17 +50,17 @@ public class DocumentController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/byLogin")
+    @GetMapping("/search/byLogin")
     public ResponseEntity<List<DocumentDto>> getDocumentsByUser(@RequestParam String username) {
         List<DocumentDto> documents = documentService.getDocumentsByUsername(username);
         return ResponseEntity.ok(documents);
     }
 
-    @GetMapping("/user/{username}/signed/{isSigned}")
+    @GetMapping("/search/byLoginAndIsSigned")
     public ResponseEntity<List<DocumentDto>> getDocumentsByUserAndSignStatus(
-            @PathVariable String username,
-            @PathVariable boolean isSigned) {
-        List<DocumentDto> documents = documentService.getDocumentsByUsernameAndSignStatus(username, isSigned);
+            @RequestParam String login,
+            @RequestParam boolean isSigned) {
+        List<DocumentDto> documents = documentService.getDocumentsByUsernameAndSignStatus(login, isSigned);
         return ResponseEntity.ok(documents);
     }
 
@@ -75,6 +74,12 @@ public class DocumentController {
 
         List<DocumentDto> documents = documentService.getDocumentsByDateRange(fromDateTime, toDateTime);
         return ResponseEntity.ok(documents);
+    }
+
+    @GetMapping("/types")
+    public ResponseEntity<DocumentType[]> getDocumentsTypes() {
+
+        return ResponseEntity.ok(DocumentType.values());
     }
 
 }
