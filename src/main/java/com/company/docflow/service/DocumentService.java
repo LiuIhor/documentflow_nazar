@@ -29,7 +29,6 @@ public class DocumentService {
 
     @Transactional
     public DocumentDto createDocument(DocumentDto document) {
-
         Document savedDocument = documentRepository.save(convertToEntity(document));
         return convertToDTO(savedDocument);
     }
