@@ -1,33 +1,58 @@
 package com.company.docflow.exception;
 
+import com.company.docflow.dto.ErrorDto;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", ex.getMessage());
+    public ResponseEntity<ErrorDto> handleEntityNotFoundException(EntityNotFoundException ex) {
+        ErrorDto errorDto = new ErrorDto(
+                LocalDateTime.now(),
+                "Entity not found",
+                ex.getMessage()
+        );
 
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGlobalException(Exception ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", "An error occurred");
-        body.put("details", ex.getMessage());
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorDto> handleConstraintViolationException(ConstraintViolationException ex) {
 
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        ErrorDto errorDto = new ErrorDto(
+                LocalDateTime.now(),
+                "Constraint Violation Exception",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorDto> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        ErrorDto errorDto = new ErrorDto(
+                LocalDateTime.now(),
+                "Database constraint violation",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorDto, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ErrorDto> handleGlobalException(RuntimeException ex) {
+
+        ErrorDto errorDto = new ErrorDto(
+                LocalDateTime.now(),
+                "An error occurred",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
